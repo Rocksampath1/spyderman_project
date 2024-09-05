@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projects - SpyderMan</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Projects</h1>
+        <div class="mb-3">
+            <a href="{% url 'create_project' %}" class="btn btn-success">Create a New Project</a>
+        </div>
+        <ul class="list-group">
+            {% for project in projects %}
+                <li class="list-group-item">
+                    <strong>{{ project.name }}</strong> ({{ project.project_type }})<br>
+                    URL: <a href="{{ project.project_url }}" target="_blank">{{ project.project_url }}</a><br>
+                    Scopes: <pre>{{ project.scopes }}</pre><br>
+                    Out of Scope: <pre>{{ project.out_of_scope }}</pre><br>
+                    Source: {{ project.source }}{% if project.source == 'Other' %} - {{ project.source_other }}{% endif %}<br>
+                    Created on: {{ project.created_on }}<br>
+                    <a href="{% url 'project_recon' project.project_id %}" class="btn btn-primary mt-2">Recon</a>
+                </li>
+            {% empty %}
+                <li class="list-group-item">No projects found.</li>
+            {% endfor %}
+        </ul>
+        <div class="mt-4 text-center">
+            <a href="{% url 'index' %}" class="btn btn-info">Back to Home</a>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

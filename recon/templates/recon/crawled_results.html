@@ -1,0 +1,29 @@
+<!-- templates/recon/crawl_results.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Crawl Results</title>
+</head>
+<body>
+    <h1>Crawl Results for {{ project.name }}</h1>
+    <table>
+        <tr>
+            <th>URL</th>
+            <th>Title</th>
+            <th>Response Code</th>
+            <th>Response Headers</th>
+            <th>Timestamp</th>
+        </tr>
+        {% for data in crawled_data %}
+        <tr>
+            <td>{{ data.url }}</td>
+            <td>{{ data.title }}</td>
+            <td>{{ data.response_code }}</td>
+            <td><pre>{{ data.response_headers }}</pre></td>
+            <td>{{ data.timestamp }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <a href="{% url 'project_recon' project.id %}">Back to Recon</a>
+</body>
+</html>

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Project - SpyderMan</title>
+</head>
+<body>
+<h1>Create a New Project</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Create Project</button>
+</form>
+<a href="{% url 'index' %}">Back to Home</a>
+</body>
+</html>

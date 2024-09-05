@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpyderMan - Web Application Recon Tool</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center">Welcome to SpyderMan</h1>
+        <p class="text-center">Select a reconnaissance task:</p>
+        <ul class="list-group">
+            <li class="list-group-item">
+                <a href="{% url 'identify_technologies' %}" class="btn btn-primary">Identify Technologies</a>
+            </li>
+            <li class="list-group-item">
+                <a href="{% url 'brute_force_directories' %}" class="btn btn-primary">Brute Force Directories</a>
+            </li>
+        </ul>
+        <div class="text-center mt-4">
+            <a href="{% url 'create_project' %}" class="btn btn-success">Create a New Project</a>
+            <a href="{% url 'list_projects' %}" class="btn btn-info ml-2">View All Projects</a>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

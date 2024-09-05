@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recon - {{ project.name }}</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 20px;
+        }
+        pre {
+            white-space: pre-wrap; /* Allows wrapping of text in preformatted text */
+        }
+        .active-subdomain {
+            background-color: #d4edda; /* Light green background for active subdomains */
+            border: 1px solid #c3e6cb; /* Border color for active subdomains */
+        }
+        .inactive-subdomain {
+            background-color: #f8d7da; /* Light red background for inactive subdomains */
+            border: 1px solid #f5c6cb; /* Border color for inactive subdomains */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Recon for Project: {{ project.name }}</h1>
+        <p><strong>Type:</strong> {{ project.project_type }}</p>
+        <p><strong>URL:</strong> <a href="{{ project.project_url }}" target="_blank">{{ project.project_url }}</a></p>
+        <p><strong>Scopes:</strong> <pre>{{ project.scopes }}</pre></p>
+        <p><strong>Out of Scope:</strong> <pre>{{ project.out_of_scope }}</pre></p>
+        <p><strong>Source:</strong> {{ project.source }}{% if project.source == 'Other' %} - {{ project.source_other }}{% endif %}</p>
+        <p><strong>Created on:</strong> {{ project.created_on }}</p>
+
+        <h2 class="mt-4">Recon Tasks</h2>
+        <ul class="list-group">
+            <li class="list-group-item">
+                <a href="{% url 'enumerate_subdomains' project.project_id %}" class="btn btn-primary">Enumerate Subdomains</a>
+            </li>
+            <li class="list-group-item">
+                <form action="{% url 'check_subdomain_responsiveness' project.project_id %}" method="post">{% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Check Subdomain Responsiveness</button>
+                </form>
+            </li>
+            <li class="list-group-item">
+                <form action="{% url 'start_technology_fingerprinting' project.project_id %}" method="post">{% csrf_token %}
+                    <button type="submit" class="btn btn-success">Start Technology Fingerprinting</button>
+                </form>
+            </li>
+            <li class="list-group-item">
+                <a href="{% url 'brute_force_directories' %}" class="btn btn-secondary">Brute Force Directories</a>
+            </li>
+            <li class="list-group-item">
+                <a href="{% url 'start_crawl_view' project.project_id %}" class="btn btn-secondary">Start Crawl</a>
+            </li>
+            <li class="list-group-item">
+                <a href="{% url 'crawl_results' project.project_id %}" class="btn btn-secondary">View Crawl Results</a>
+            </li>
+        </ul>
+
+        <h2 class="mt-4">Subdomains</h2>
+        <!-- Filter Form -->
+        <form id="filter-form" method="get" class="mb-3">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="show-active" name="show_active" {% if request.GET.show_active %}checked{% endif %}>
+                <label class="form-check-label" for="show-active">Show only Active</label>
+            </div>
+            <button type="submit" class="btn btn-primary mt-2">Apply Filter</button>
+        </form>
+        <ul class="list-group">
+            {% for subdomain in subdomains %}
+                <li class="list-group-item {% if subdomain.active %}active-subdomain{% else %}inactive-subdomain{% endif %}">
+                    <a href="{{ subdomain.url }}" target="_blank"><strong>URL:</strong> {{ subdomain.url }}</a><br>
+                    <strong>Date Fetched:</strong> {{ subdomain.date_fetched }}<br>
+                    <strong>Active:</strong> {{ subdomain.active }}
+                </li>
+            {% empty %}
+                <li class="list-group-item">No subdomains found.</li>
+            {% endfor %}
+        </ul>
+
+        <!-- Pagination -->
+        <div class="mt-4">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if subdomains.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if request.GET.show_active %}&show_active=true{% endif %}" aria-label="First">
+                                <span aria-hidden="true">&laquo;&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ subdomains.previous_page_number }}{% if request.GET.show_active %}&show_active=true{% endif %}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% for page_num in subdomains.paginator.page_range %}
+                        {% if subdomains.number == page_num %}
+                            <li class="page-item active" aria-current="page">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                        {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_num }}{% if request.GET.show_active %}&show_active=true{% endif %}">{{ page_num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    {% if subdomains.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ subdomains.next_page_number }}{% if request.GET.show_active %}&show_active=true{% endif %}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ subdomains.paginator.num_pages }}{% if request.GET.show_active %}&show_active=true{% endif %}" aria-label="Last">
+                                <span aria-hidden="true">&raquo;&raquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Technology Fingerprint Section -->
+        <h2 class="mt-4">Technology Fingerprint</h2>
+        {% if technology %}
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <strong>Content Delivery Network:</strong><br>
+                    <pre>{{ technology.content_delivery_network }}</pre>
+                </li>
+                <li class="list-group-item">
+                    <strong>Content Management System:</strong><br>
+                    <pre>{{ technology.content_management_system }}</pre>
+                </li>
+                <li class="list-group-item">
+                    <strong>Web Hosting Provider:</strong><br>
+                    <pre>{{ technology.web_hosting_provider }}</pre>
+                </li>
+                <li class="list-group-item">
+                    <strong>Who Is Lookup:</strong><br>
+                    <pre>{{ technology.who_is_lookup }}</pre>
+                </li>
+                <li class="list-group-item">
+                    <strong>Web Server:</strong><br>
+                    <pre>{{ technology.web_server }}</pre>
+                </li>
+            </ul>
+        {% else %}
+            <p>No technology fingerprinting data available.</p>
+        {% endif %}
+
+        <div class="mt-4 text-center">
+            <a href="{% url 'list_projects' %}" class="btn btn-info">Back to Projects</a>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
